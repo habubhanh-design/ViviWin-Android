@@ -1,0 +1,41 @@
+
+name: Android CI Build
+
+on:
+  # This triggers the workflow on every push to the main branch
+  push:
+    branches: [ "main" ]
+  # You can manually trigger the workflow if needed
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    # 1. Checks out your repository code
+    - uses: actions/checkout@v4 
+    
+    # 2. Sets up Java 17, required by modern Android/Gradle
+    - uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    # 3. Sets up the Android SDK tools
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v2
+
+    # 4. Grants permission to execute the Gradle Wrapper script
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # 5. The core build command to compile the debug APK
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+
+    # 6. Makes the resulting APK available for download
+    - name: Upload APK as Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: app/build/outputs/apk/debug/app-debug.apk
